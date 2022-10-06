@@ -1,278 +1,226 @@
 #include<stdio.h>
 #include<stdlib.h>
 
-struct node
-{
-    int key;
-    struct node* lchild;
-    struct node* rchild;
-};
 
-typedef struct node Node;
-struct bst
+typedef struct node
 {
-    Node* troot;
-};
+    int info;
+    struct node *lchild,*rchild;
+}Node;
 
-typedef struct bst BST;
-
-void init(BST* bstree)
+typedef struct tree
 {
-    bstree->troot = NULL;
+    Node* root;
+}Tree;
+
+void init(Tree* pt)
+{
+    pt->root = NULL;
 }
 
-
-Node* createnode(int data)
+Node* createNode(int data)
 {
-    Node* newnode;
-    newnode= (Node*)malloc(sizeof(Node));
-    newnode->lchild = NULL;
-    newnode->rchild = NULL;
-    newnode->key = data;
+    if(data != -1)
+    {
+        Node* newnode = (Node*)malloc(sizeof(Node));
+        newnode->info = data;
+        newnode->lchild = NULL;
+        newnode->rchild = NULL;
+        return newnode;
+    }
+    return NULL;
 }
-Node* insert(Node* root,int data)
+
+Node* createTree(Node* root,int data)
 {
     if(root == NULL)
     {
-        root = createnode(data);
-        return root;
+        return createNode(data);
     }
-    if(data < root->key)
+    if(data < root->info)
     {
-        root->lchild = insert(root->lchild,data);
+        root->lchild = createTree(root->lchild,data);
     }
-    else if(data > root->key)
+    else if(data > root->info)
     {
-        root->rchild = insert(root->rchild,data);
+        root->rchild = createTree(root->rchild,data);
     }
     else
     {
-        printf("\n Node data is duplicate\n");
+        printf("duplicate element\n");
+        return NULL;
     }
     return root;
 }
 
+
+void inorder(Node* root)
+{
+    
+    if(root == NULL)
+    {
+        return;
+    }
+    else
+    {
+        inorder(root->lchild);
+        printf("%d ",root->info);
+        inorder(root->rchild);
+    }
+}
+
 void preorder(Node* root)
 {
-    if(root != NULL)
+    if(root == NULL)
     {
-        printf("%d ",root->key);
+        return;
+    }
+    else
+    {
+        printf("%d ",root->info);
         preorder(root->lchild);
         preorder(root->rchild);
     }
 }
-void inorder(Node* root)
+void postorder(Node* root)
 {
-    if(root != NULL)
+    if(root == NULL)
     {
-        inorder(root->lchild);
-        printf("%d ",root->key);
-        inorder(root->rchild);
-        
+        return;
+    }
+    else
+    {
+        postorder(root->lchild);
+        postorder(root->rchild);
+        printf("%d ",root->info);
     }
 }
 
 int findmin(Node* root)
 {
-    Node* cur = root;
     if(root == NULL)
     {
-        printf("\n Empty BST \n");
+        printf("empty BST\n");
         return -1;
     }
+    Node* cur = root;
     while(cur->lchild != NULL)
     {
         cur = cur->lchild;
     }
-    return cur->key;
-
-
+    return cur->info;
 }
+
 int findmax(Node* root)
 {
-    Node* cur = root;
     if(root == NULL)
     {
-        printf("\n Empty BST \n");
+        printf("\nEmpty BST\n");
         return -1;
     }
+    Node* cur = root;
     while(cur->rchild != NULL)
     {
         cur = cur->rchild;
     }
-    return cur->key;
+    return cur->info;
 }
 
-int leafcount(Node* troot)
+int leafcount(Node* root)
 {
-    int l,r;
-    if(troot != NULL)
-    {
-        l = leafcount(troot->lchild);
-        r = leafcount(troot->rchild);
-        return (l+r);
-    }
-    
-    
-}
-
-int nonleafcount(Node* troot)
-{
-    if(troot == NULL || (troot->lchild == NULL && troot->rchild == NULL))
+    if(root == NULL)
     {
         return 0;
     }
-    return(nonleafcount(troot->lchild) + 1 + nonleafcount(troot->rchild));
-}
-
-int height(Node* troot)
-{
-    int l,r;
-    if(troot != NULL)
-
+    else if(root->lchild == NULL && root->rchild == NULL)
     {
-        if(troot->lchild == NULL && troot->rchild == NULL)
-        {
-            return 0;
-        }
-        l = height(troot->lchild);
-        r = height(troot->rchild);
-        if(l>r)
-        {
-            return l+1;
-        }
-        return r+1;
-    }
-    return -1;
-}
-
-int size(Node* troot)
-{
-    if(troot == NULL)
-    {
-        return 0;
-    }
-    return (size(troot->lchild) + 1 + size(troot->rchild));
-}
-
-void mirror(Node* troot)
-{
-    Node* temp = NULL;
-    if(troot == NULL)
-    {
-        return;
-    }
-    temp = troot->lchild;
-    troot->lchild = troot->rchild;
-    troot->rchild = temp;
-    mirror(troot->lchild);
-    mirror(troot->rchild);
-}
-Node* deleteNode(Node* troot,int ele)
-{
-    Node* temp = NULL;
-    if(troot == NULL)
-    {
-        return NULL;
-    }
-    if(ele < troot->key)
-    {
-        troot->lchild = deleteNode(troot->lchild,ele);
-    }
-    else if(ele > troot->key)
-    {
-        troot->rchild = deleteNode(troot->rchild,ele);
+        return 1;
     }
     else
     {
-        if(troot->lchild == NULL )
+        int l,r;
+        l = leafcount(root->lchild);
+        r = leafcount(root->rchild);
+        return l+r;
+    }
+}
+
+int nonleaf(Node* root)
+{
+    if(root == NULL || (root->lchild == NULL && root->rchild == NULL))
+    {
+        return 0;
+    }
+    return (nonleaf(root->lchild) + 1 + nonleaf(root->rchild));
+}
+
+int height(Node* root)
+{
+    if(root == NULL)
+    {
+        return 0;
+    }
+    else
+    {
+        int l,r;
+        l = height(root->lchild);
+        r = height(root->rchild);
+        if(l > r)
         {
-            temp = troot->rchild;
-            free(troot);
-            return temp;
-        }
-        else if(troot->rchild == NULL)
-        {
-            temp = troot->rchild;
-            free(troot);
-            return temp;
+            return l+1;
         }
         else
         {
-            troot->key = findmin(troot->rchild);
-            troot->rchild = deleteNode(troot->rchild,troot->key);
-            
+            return r+1;
         }
-
     }
+}
+void mirror(Node* root)
+{
+    if(root == NULL)
+    {
+        return;
+    }
+    Node* temp = root->lchild;
+    root->lchild = root->rchild;
+    root->rchild = temp;
+    mirror(root->lchild);
+    mirror(root->rchild);
 }
 int main()
 {
+    Tree BST;
+    init(&BST);
+    printf("Enter the elements:\n");
     int data;
-    BST bstree;
-    init(&bstree);
-    int flag = 1;
-    while(flag)
+    do
     {
-        printf("\nEnter the node key value -1 to stop : ");
         scanf("%d",&data);
-        if(data == -1)
+        if(BST.root == NULL)
         {
-            flag = 0;
+            BST.root = createTree(BST.root,data);
         }
         else
         {
-            if(bstree.troot == NULL)
-            {
-                bstree.troot = insert(bstree.troot,data);
-            }
-            else
-            {
-                insert(bstree.troot,data);
-            }
+            createTree(BST.root,data);
         }
-    }
+    }while(data != -1);
 
-    printf("\nPreorder Traversal \n");
-    preorder(bstree.troot);
-
-    printf("\nInorder Traversal \n");
-    inorder(bstree.troot);
-
-    int min = findmin(bstree.troot);
-    int max = findmax(bstree.troot);
-
-    printf("\n Min value in BST : %d",min);
-    printf("\n Min value in BST : %d",max);
-    int leaf = leafcount(bstree.troot);
-    printf("\nNo of leaves are : %d\n",leaf);
-    int nleaf = nonleafcount(bstree.troot);
-    printf("\nNo of nonleaves are : %d\n",nleaf);
-
-    int ht = height(bstree.troot);
-    printf("\n height of the tree is : %d\n",ht);
-
-
-    int nodecount = size(bstree.troot);
-    printf("\nthe number of nodes are: %d\n",nodecount);
-
-    // mirror(bstree.troot);
-    // printf("\nInorder Traversal \n");
-    // inorder(bstree.troot);
-
-    int ele;
-
-    printf("enter the element to be deleted:\n");
-    scanf("%d",&ele);
-
-    bstree.troot = deleteNode(bstree.troot,ele);
-
-    printf("\nInorder Traversal \n");
-    inorder(bstree.troot);
-
+    printf("\nInorder traversal of the binary search tree:\n");
+    inorder(BST.root);
+    // printf("\nPreorder traversal of the binary search tree:\n");
+    // preorder(BST.root);
+    // printf("\nPostorder traversal of the binary search tree:\n");
+    // postorder(BST.root);
+    printf("\nMin element : %d\n",findmin(BST.root));
+    printf("\nMax element : %d\n",findmax(BST.root));
+    printf("\nNumber of leaf nodes are : %d\n",leafcount(BST.root));
+    printf("\nNumber of nonleaf nodes are : %d\n",nonleaf(BST.root));
+    printf("\nHeight of tree : %d\n",height(BST.root));
+    mirror(BST.root);
+    printf("\nInorder traversal of the binary search tree:\n");
+    inorder(BST.root);
 
 
     return 0;
-
-
 }
